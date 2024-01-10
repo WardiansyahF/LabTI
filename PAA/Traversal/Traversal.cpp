@@ -1,166 +1,118 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <vector>
 
-int q[20], top = -1, front = -1, rear = -1, a[20][20], vis[20], stack[20];
+using namespace std;
 
-void add(int item);
-int del();
-int pop();
-void push(int item);
+class Graf {
+private:
+    int vertices;
+    vector<vector<int> > adjacencyList;
 
-void bfs(int s, int n);
-void dfs(int s, int n);
+public:
+    Graf(int v) : vertices(v), adjacencyList(v + 1) {}
 
-void add(int item){
-  if(rear == 19){
-    printf("Antrian Full");
-  }else{
-    if(rear == -1){
-      q[++rear] = item;
-      front++;
-    }else{
-      q[++rear] = item;
+    void tambahSisi(int v, int w) {
+        adjacencyList[v].push_back(w);
+        adjacencyList[w].push_back(v); // If the graph is undirected, add this line.
     }
-  }
+
+    void BFS(int mulai) {
+    vector<bool> dikunjungi(vertices + 1, false);
+    queue<int> q;
+    q.push(mulai);
+    dikunjungi[mulai] = true;
+
+    while (!q.empty()) {
+        int saatIni = q.front();
+        cout << saatIni << " ";
+        q.pop();
+
+        // Reverse the order of neighbors
+        for (vector<int>::iterator it = adjacencyList[saatIni].begin(); it != adjacencyList[saatIni].end(); ++it) {
+            int tetangga = *it;
+            if (!dikunjungi[tetangga]) {
+                q.push(tetangga);
+                dikunjungi[tetangga] = true;
+            }
+        }
+    }
 }
 
-int del(){
-  int k;
+void DFS(int mulai) {
+    vector<bool> dikunjungi(vertices + 1, false);
+    stack<int> s;
+    s.push(mulai);
 
-  if((front > rear) || (front == -1)){
+    while (!s.empty()) {
+        int saatIni = s.top();
+        s.pop();
+
+        if (!dikunjungi[saatIni]) {
+            cout << saatIni << " ";
+            dikunjungi[saatIni] = true;
+        }
+
+        // Reverse the order of neighbors
+        for (vector<int>::reverse_iterator it = adjacencyList[saatIni].rbegin(); it != adjacencyList[saatIni].rend(); ++it) {
+            int tetangga = *it;
+            if (!dikunjungi[tetangga]) {
+                s.push(tetangga);
+            }
+        }
+    }
+}
+};
+
+int main() {
+    int vertices, edges;
+    cout << "Masukkan jumlah simpul: ";
+    cin >> vertices;
+    Graf graf(vertices);
+
+    cout << "Masukkan jumlah sisi: ";
+    cin >> edges;
+
+    cout << "Masukkan sisi-sisi (format: sumber tujuan):" << endl;
+    for (int i = 0; i < edges; ++i) {
+        int sumber, tujuan;
+        cin >> sumber >> tujuan;
+        graf.tambahSisi(sumber, tujuan);
+    }
+
+    int pilihan;
+    do {
+        cout << "\nMenu:\n1. Breadth-First Search (BFS)\n2. Depth-First Search (DFS)\n0. Keluar\nMasukkan pilihan: ";
+        cin >> pilihan;
+
+        switch (pilihan) {
+            case 1:
+                cout << "Masukkan simpul awal untuk BFS: ";
+                int bfsMulai;
+                cin >> bfsMulai;
+                cout << "Hasil traversal BFS: ";
+                graf.BFS(bfsMulai);
+                cout << endl;
+                break;
+
+            case 2:
+                cout << "Masukkan simpul awal untuk DFS: ";
+                int dfsMulai;
+                cin >> dfsMulai;
+                cout << "Hasil traversal DFS: ";
+                graf.DFS(dfsMulai);
+                cout << endl;
+                break;
+
+            case 0:
+                cout << "Keluar dari program. Selamat tinggal!\n";
+                break;
+
+            default:
+                cout << "Pilihan tidak valid. Harap masukkan opsi yang benar.\n";
+        }
+    } while (pilihan != 0);
+
     return 0;
-  }else{
-    k = q[front++];
-    return k;
-  }
 }
-
-void push(int item){
-  if(top == 10){
-    printf("Stack Overflow");
-  }else{
-    stack[++top] = item;
-  }
-}
-
-int pop(){
-  int k;
-
-  if(top == -1){
-    return 0;
-  }else{
-    k = stack[top--];
-    return k;
-  }
-}
-
-void bfs(int s, int n){
-  int p, i;
-  add(s);
-  vis[s] = 1;
-  p = del();
-
-  if (p != 0){
-    printf("%d", p);
-  }
-  
-  while(p != 0){
-    for (i = 1; i <= n; i++){
-      if((a[p][i] != 0) && (vis[i] == 0)){
-        add(i);
-        vis[i] = 1;
-      }
-      p = del();
-      if (p != 0){
-        printf("%d", p);
-      }
-    }
-  }
-
-  for (i = 1; i <= n; i++){
-    if (vis[i] == 0){
-      bfs(i,n);
-    }
-  }
-}
-
-void dfs(int s, int n){
-  int i, k;
-
-  push(s);
-
-  vis[s] = 1;
-  k = pop();
-
-  if(k != 0){
-    printf("%d", k);
-  }
-
-  while(k != 0){
-    for(i = 1; i <= n; i++){
-      if((a[k][i] != 0) && (vis[i] == 0)){
-        push(i);
-        vis[i] = 1;
-      }
-      k = pop();
-      if(k != 0){
-        printf("%d", k);
-      }
-    }
-    for (i = 1; i <= n; i++){
-      if(vis[i] == 0){
-        dfs(i,n);
-      }
-    }
-  }
-}
-
-
-
-
-int main(){
-  int n, i, s, ch, j;
-  char c;
-  printf("Masukkan Angka : ");
-  scanf("%d", &n);
-
-  for (i = 1; i <= n; i++){
-    for (j = 1; j <= n; j++){
-      printf("Masukkan 1 jika %d terhubung dengan %d selain itu masukkan 0 : ", i, j);
-      scanf("%d", &a[i][j]);
-    }
-  }
-
-  printf("\n Matriks Adjensi\n");
-  for(i = 1; i <= n; i++){
-    for(j = 1; j <=n; j++){
-      printf("%d", a[i][j]);
-    }
-    printf("\n");
-  }
-
-  do{
-    for (i = 1; i <= n; i++)
-      a: vis[i] = 0;
-    printf("\nMenu");
-    printf("\n1. BFS");
-    printf("\n2. DFS");
-    printf("\nPilihan : ");
-    scanf("%d", &ch);
-    printf("\nMasukkan simpul sumber: ");
-    scanf("%d", &s);
-
-    switch(ch){
-      case 1: bfs(s,n);
-      break;
-      case 2: dfs(s,n);
-      break;
-    }
-    printf("\n");
-    printf("Apakah Ingin Melanjutkan? (Y/N)");
-    scanf(" %c", &c);
-    
-  }while((c == 'Y') || (c == 'y'));
-}
-
-
