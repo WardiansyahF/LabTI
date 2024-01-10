@@ -68,8 +68,9 @@ func GetJadwal(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/Jadwal", GetJadwal)
-	fmt.Println("server running...")
-	if err := http.ListenAndServe(":8888", nil); err != nil {
+	port := ":8014"
+	fmt.Printf("Server running on http://localhost%s/Jadwal\n", port)
+	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal(err)
 	}
 }
